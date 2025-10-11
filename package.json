@@ -1,0 +1,29 @@
+{
+  "name": "crypto-volatility-alerts",
+  "version": "1.0.0",
+  "description": "Monitor intraday cryptocurrency volatility and send email alerts via Resend",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node src/index.js",
+    "test-config": "node test-config.js"
+  },
+  "keywords": [
+    "crypto",
+    "binance",
+    "volatility",
+    "alerts",
+    "resend"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "luxon": "^3.4.4",
+    "resend": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
+

@@ -1,0 +1,19 @@
+{
+  "date": "2025-10-11",
+  "tz": "Asia/Shanghai",
+  "symbols": {
+    "BTCUSDT": {
+      "openPrice": 67890.12,
+      "nextThresholdPct": 6
+    },
+    "ETHUSDT": {
+      "openPrice": 3456.78,
+      "nextThresholdPct": 6
+    },
+    "BNBUSDT": {
+      "openPrice": 512.34,
+      "nextThresholdPct": 6
+    }
+  }
+}
+

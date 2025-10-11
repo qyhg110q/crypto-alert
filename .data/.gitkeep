@@ -1,0 +1,3 @@
+# This directory stores the state.json file
+# The state.json file will be automatically created and committed by GitHub Actions
+
