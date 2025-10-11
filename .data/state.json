@@ -12,7 +12,7 @@
     },
     "BNBUSDT": {
       "openPrice": null,
-      "nextThresholdPct": 8
+      "nextThresholdPct": 10
     }
   }
 }
