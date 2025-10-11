@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/index.js",
     "test": "node src/index.js",
-    "test-config": "node test-config.js"
+    "test-config": "node test-config.js",
+    "test-email": "node src/test-email.js"
   },
   "keywords": [
     "crypto",

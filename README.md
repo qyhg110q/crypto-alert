@@ -55,7 +55,17 @@
 2. 如果看到提示，点击 **I understand my workflows, go ahead and enable them**
 3. 工作流将在下一个 5 分钟整点自动运行
 
-### 6. 手动触发测试
+### 6. 测试邮件功能（推荐）
+
+在配置完成后，建议先测试邮件功能：
+
+1. 进入 **Actions** → **Test Email** → **Run workflow**
+2. 这会发送一封测试邮件，包含：
+   - Hello 测试信息
+   - BTC、ETH、BNB 的当前价格
+   - 验证邮件发送和价格获取功能是否正常
+
+### 7. 手动触发完整监控测试
 
 进入 **Actions** → **Crypto Volatility Alert** → **Run workflow** 进行手动测试。
 
@@ -87,6 +97,10 @@ SYMBOLS=BTCUSDT,ETHUSDT,BNBUSDT
 ### 运行
 
 ```bash
+# 发送测试邮件（验证邮箱和价格获取功能）
+npm run test-email
+
+# 运行完整监控
 npm start
 ```
 

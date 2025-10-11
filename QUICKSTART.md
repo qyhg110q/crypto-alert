@@ -51,12 +51,29 @@ Resend 提供两种方式：
 
 这样 Actions 才能自动提交状态文件。
 
-## 步骤 5：启用并测试工作流
+## 步骤 5：启用工作流
 
 1. 进入仓库的 **Actions** 标签页
 2. 如果看到提示，点击 **I understand my workflows, go ahead and enable them**
-3. 点击左侧 **Crypto Volatility Alert**
-4. 点击右侧 **Run workflow** → **Run workflow** 进行测试
+
+## 步骤 5.5：测试邮件功能（推荐）
+
+在开始监控前，建议先测试邮件功能：
+
+1. 在 **Actions** 页面，点击左侧 **Test Email**
+2. 点击右侧 **Run workflow** → **Run workflow**
+3. 等待运行完成（约 30 秒）
+4. 检查你的 QQ 邮箱（包括垃圾邮件文件夹）
+
+你会收到一封测试邮件，包含：
+- ? Hello 测试信息
+- ? BTC、ETH、BNB 的当前价格
+- ? 确认邮件发送和价格获取功能正常
+
+## 步骤 6：完整功能测试（可选）
+
+1. 在 **Actions** 页面，点击左侧 **Crypto Volatility Alert**
+2. 点击右侧 **Run workflow** → **Run workflow** 进行完整测试
 
 ### 查看运行结果
 
@@ -71,7 +88,7 @@ Resend 提供两种方式：
   === Crypto Volatility Monitor Completed ===
   ```
 
-## 步骤 6：等待告警
+## 步骤 7：等待告警
 
 现在一切就绪！工作流会：
 - ? 每 5 分钟自动运行一次
