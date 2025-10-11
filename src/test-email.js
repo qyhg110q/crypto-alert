@@ -45,7 +45,7 @@ async function sendTestEmail() {
     }
     
     // Add small delay between requests to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
   
   // Build email content

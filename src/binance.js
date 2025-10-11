@@ -19,46 +19,80 @@ async function fetchWithTimeout(url, timeout = REQUEST_TIMEOUT) {
 }
 
 /**
- * Get current price for a symbol from Binance
+ * Get current price for a symbol from Binance with retry
  * @param {string} symbol - Trading pair symbol (e.g., 'BTCUSDT')
+ * @param {number} retries - Number of retry attempts (default: 2)
  * @returns {Promise<number|null>} Current price or null if failed
  */
-export async function getCurrentPrice(symbol) {
-  try {
-    const url = `${BINANCE_API_BASE}/api/v3/ticker/price?symbol=${symbol}`;
-    console.log(`Fetching price from: ${url}`);
-    
-    const response = await fetchWithTimeout(url);
-    
-    if (!response.ok) {
-      console.error(`Failed to fetch price for ${symbol}: ${response.status} ${response.statusText}`);
-      const text = await response.text();
-      console.error(`Response body: ${text}`);
+export async function getCurrentPrice(symbol, retries = 2) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const url = `${BINANCE_API_BASE}/api/v3/ticker/price?symbol=${symbol}`;
+      console.log(`[Attempt ${attempt}/${retries}] Fetching price from: ${url}`);
+      
+      const response = await fetchWithTimeout(url);
+      
+      if (!response.ok) {
+        console.error(`Failed to fetch price for ${symbol}: ${response.status} ${response.statusText}`);
+        const text = await response.text();
+        console.error(`Response body: ${text}`);
+        
+        // If not the last attempt, wait and retry
+        if (attempt < retries) {
+          console.log(`   Retrying in 1 second...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+        return null;
+      }
+      
+      const data = await response.json();
+      
+      if (!data || !data.price) {
+        console.error(`Invalid data format for ${symbol}:`, data);
+        
+        if (attempt < retries) {
+          console.log(`   Retrying in 1 second...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+        return null;
+      }
+      
+      const price = parseFloat(data.price);
+      if (isNaN(price) || price <= 0) {
+        console.error(`Invalid price value for ${symbol}: ${data.price}`);
+        
+        if (attempt < retries) {
+          console.log(`   Retrying in 1 second...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+        return null;
+      }
+      
+      console.log(`   Success! ${symbol} = $${price.toFixed(2)}`);
+      return price;
+      
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.error(`Request timeout for ${symbol} after ${REQUEST_TIMEOUT}ms`);
+      } else {
+        console.error(`Error fetching price for ${symbol}:`, error.message);
+      }
+      
+      // If not the last attempt, wait and retry
+      if (attempt < retries) {
+        console.log(`   Retrying in 1 second...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        continue;
+      }
+      
       return null;
     }
-    
-    const data = await response.json();
-    
-    if (!data || !data.price) {
-      console.error(`Invalid data format for ${symbol}:`, data);
-      return null;
-    }
-    
-    const price = parseFloat(data.price);
-    if (isNaN(price) || price <= 0) {
-      console.error(`Invalid price value for ${symbol}: ${data.price}`);
-      return null;
-    }
-    
-    return price;
-  } catch (error) {
-    if (error.name === 'AbortError') {
-      console.error(`Request timeout for ${symbol} after ${REQUEST_TIMEOUT}ms`);
-    } else {
-      console.error(`Error fetching price for ${symbol}:`, error.message);
-    }
-    return null;
   }
+  
+  return null;
 }
 
 /**
