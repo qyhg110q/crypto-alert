@@ -1,4 +1,22 @@
 const BINANCE_API_BASE = 'https://api.binance.com';
+const REQUEST_TIMEOUT = 10000; // 10 seconds
+
+/**
+ * Fetch with timeout
+ */
+async function fetchWithTimeout(url, timeout = REQUEST_TIMEOUT) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
 
 /**
  * Get current price for a symbol from Binance
@@ -8,17 +26,37 @@ const BINANCE_API_BASE = 'https://api.binance.com';
 export async function getCurrentPrice(symbol) {
   try {
     const url = `${BINANCE_API_BASE}/api/v3/ticker/price?symbol=${symbol}`;
-    const response = await fetch(url);
+    console.log(`Fetching price from: ${url}`);
+    
+    const response = await fetchWithTimeout(url);
     
     if (!response.ok) {
       console.error(`Failed to fetch price for ${symbol}: ${response.status} ${response.statusText}`);
+      const text = await response.text();
+      console.error(`Response body: ${text}`);
       return null;
     }
     
     const data = await response.json();
-    return parseFloat(data.price);
+    
+    if (!data || !data.price) {
+      console.error(`Invalid data format for ${symbol}:`, data);
+      return null;
+    }
+    
+    const price = parseFloat(data.price);
+    if (isNaN(price) || price <= 0) {
+      console.error(`Invalid price value for ${symbol}: ${data.price}`);
+      return null;
+    }
+    
+    return price;
   } catch (error) {
-    console.error(`Error fetching price for ${symbol}:`, error.message);
+    if (error.name === 'AbortError') {
+      console.error(`Request timeout for ${symbol} after ${REQUEST_TIMEOUT}ms`);
+    } else {
+      console.error(`Error fetching price for ${symbol}:`, error.message);
+    }
     return null;
   }
 }
@@ -32,10 +70,14 @@ export async function getCurrentPrice(symbol) {
 export async function getOpenPriceAtLocalMidnight(symbol, startMs) {
   try {
     const url = `${BINANCE_API_BASE}/api/v3/klines?symbol=${symbol}&interval=1m&startTime=${startMs}&limit=1`;
-    const response = await fetch(url);
+    console.log(`Fetching klines from: ${url}`);
+    
+    const response = await fetchWithTimeout(url);
     
     if (!response.ok) {
       console.error(`Failed to fetch klines for ${symbol}: ${response.status} ${response.statusText}`);
+      const text = await response.text();
+      console.error(`Response body: ${text}`);
       return null;
     }
     
@@ -48,9 +90,19 @@ export async function getOpenPriceAtLocalMidnight(symbol, startMs) {
     
     // Kline format: [openTime, open, high, low, close, volume, ...]
     const openPrice = parseFloat(data[0][1]);
+    
+    if (isNaN(openPrice) || openPrice <= 0) {
+      console.error(`Invalid open price value for ${symbol}: ${data[0][1]}`);
+      return null;
+    }
+    
     return openPrice;
   } catch (error) {
-    console.error(`Error fetching klines for ${symbol}:`, error.message);
+    if (error.name === 'AbortError') {
+      console.error(`Request timeout for ${symbol} klines after ${REQUEST_TIMEOUT}ms`);
+    } else {
+      console.error(`Error fetching klines for ${symbol}:`, error.message);
+    }
     return null;
   }
 }
