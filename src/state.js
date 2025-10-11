@@ -64,3 +64,28 @@ export function createInitialState(date, tz, symbols) {
   return state;
 }
 
+/**
+ * Create an initial state for 24h mode (CoinGecko)
+ * @param {string} date - Date string (YYYY-MM-DD)
+ * @param {string} tz - Timezone
+ * @param {string[]} symbols - Array of symbol names
+ * @param {number} initialThreshold - Initial threshold percentage
+ * @returns {object} Initial state object
+ */
+export function createInitialStateFor24h(date, tz, symbols, initialThreshold = 6) {
+  const state = {
+    date,
+    tz,
+    mode: '24h',
+    symbols: {}
+  };
+  
+  for (const symbol of symbols) {
+    state.symbols[symbol] = {
+      nextThresholdPct: initialThreshold
+    };
+  }
+  
+  return state;
+}
+

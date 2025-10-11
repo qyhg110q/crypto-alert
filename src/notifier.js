@@ -54,7 +54,7 @@ function buildSubject(triggers, date) {
   const directions = new Set(triggers.map(t => t.pct > 0 ? 'Up' : 'Down'));
   const direction = directions.size === 1 ? Array.from(directions)[0] : 'Mixed';
   
-  return `[Volatility Alert] Reached ${maxThreshold}% intraday (${direction}) - ${date}`;
+  return `[Volatility Alert] Reached ${maxThreshold}% (24h) (${direction}) - ${date}`;
 }
 
 /**
@@ -82,34 +82,38 @@ function buildBody(triggers) {
   // Add alert details
   for (const trigger of triggers) {
     const sign = trigger.pct >= 0 ? '+' : '';
-    const direction = trigger.pct >= 0 ? 'UP' : 'DOWN';
-    const line = `${trigger.symbol} hit ${trigger.threshold}% threshold (now ${sign}${trigger.pct.toFixed(2)}%, price $${trigger.price.toFixed(2)}, open $${trigger.openPrice.toFixed(2)})`;
+    const line = `${trigger.symbol} hit ${trigger.threshold}% threshold (24h change: ${sign}${trigger.pct.toFixed(2)}%, current price: $${trigger.price.toFixed(2)})`;
     lines.push(line);
   }
   
   lines.push('');
   lines.push('------------------------------------------------------------');
   lines.push('');
-  lines.push('CURRENT PRICES:');
+  lines.push('CURRENT PRICES & 24H RANGES:');
   lines.push('');
   
   // Group triggers by symbol to show unique prices
-  const symbolPrices = new Map();
+  const symbolData = new Map();
   for (const trigger of triggers) {
-    if (!symbolPrices.has(trigger.symbol)) {
-      symbolPrices.set(trigger.symbol, {
+    if (!symbolData.has(trigger.symbol)) {
+      symbolData.set(trigger.symbol, {
         price: trigger.price,
-        openPrice: trigger.openPrice,
-        pct: trigger.pct
+        pct: trigger.pct,
+        high24h: trigger.high24h,
+        low24h: trigger.low24h,
+        name: trigger.name
       });
     }
   }
   
-  // Display current prices
-  for (const [symbol, data] of symbolPrices) {
+  // Display current prices and 24h range
+  for (const [symbol, data] of symbolData) {
     const coin = symbol.replace('USDT', '');
     const sign = data.pct >= 0 ? '+' : '';
-    lines.push(`  ${coin.padEnd(8)} | $${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${data.pct.toFixed(2)}% from open $${data.openPrice.toFixed(2)})`);
+    lines.push(`  ${coin.padEnd(8)} | $${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${data.pct.toFixed(2)}% in 24h)`);
+    if (data.high24h && data.low24h) {
+      lines.push(`             24h range: $${data.low24h.toFixed(2)} - $${data.high24h.toFixed(2)}`);
+    }
   }
   
   lines.push('');
@@ -120,7 +124,7 @@ function buildBody(triggers) {
   lines.push('='.repeat(60));
   lines.push('');
   lines.push('This is an automated alert from your crypto volatility monitoring service.');
-  lines.push('The system monitors price changes every 5 minutes and resets daily at 00:00.');
+  lines.push('The system monitors 24-hour price changes every 5 minutes using CoinGecko API.');
   
   return lines.join('\n');
 }

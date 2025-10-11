@@ -1,9 +1,9 @@
 import { Resend } from 'resend';
-import { getCurrentPrice } from './binance.js';
+import { getMarketData } from './coingecko.js';
 
 /**
  * Test email functionality
- * Sends a hello test email with current BTC/ETH/BNB prices
+ * Sends a hello test email with current BTC/ETH/BNB prices from CoinGecko
  */
 async function sendTestEmail() {
   console.log('=== Email Test Started ===\n');
@@ -14,45 +14,33 @@ async function sendTestEmail() {
   const emailFrom = process.env.EMAIL_FROM;
   
   if (!apiKey || !emailTo || !emailFrom) {
-    console.error('? Missing required environment variables!');
+    console.error('[ERROR] Missing required environment variables!');
     console.error('Required: RESEND_API_KEY, EMAIL_TO, EMAIL_FROM');
     process.exit(1);
   }
   
-  console.log('? Environment variables configured');
+  console.log('[OK] Environment variables configured');
   console.log(`   From: ${emailFrom}`);
   console.log(`   To: ${emailTo}\n`);
   
-  // Fetch current prices
-  console.log('?? Fetching current prices...');
+  // Fetch current prices from CoinGecko
+  console.log('[INFO] Fetching current prices from CoinGecko...');
   const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
-  const prices = {};
   
-  for (const symbol of symbols) {
-    try {
-      console.log(`   Fetching ${symbol}...`);
-      const price = await getCurrentPrice(symbol);
-      if (price !== null) {
-        prices[symbol] = price;
-        console.log(`   ${symbol}: $${price.toFixed(2)} ?`);
-      } else {
-        console.warn(`   ${symbol}: Failed to fetch price (API returned null)`);
-        prices[symbol] = null;
-      }
-    } catch (error) {
-      console.error(`   ${symbol}: Error - ${error.message}`);
-      prices[symbol] = null;
-    }
-    
-    // Add small delay between requests to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 500));
+  const marketData = await getMarketData(symbols);
+  
+  if (!marketData) {
+    console.error('[ERROR] Failed to fetch market data from CoinGecko');
+    process.exit(1);
   }
   
-  // Build email content
-  const subject = '[Test] Crypto Volatility Alert - Hello Test';
-  const body = buildTestEmailBody(prices);
+  console.log('[OK] Market data fetched successfully\n');
   
-  console.log('\n? Sending test email...');
+  // Build email content
+  const subject = '[Test] Crypto Volatility Alert - Hello Test (CoinGecko)';
+  const body = buildTestEmailBody(marketData);
+  
+  console.log('[INFO] Sending test email...');
   
   // Send email
   const resend = new Resend(apiKey);
@@ -65,17 +53,17 @@ async function sendTestEmail() {
       text: body
     });
     
-    console.log('? Test email sent successfully!');
+    console.log('[OK] Test email sent successfully!');
     console.log(`   Email ID: ${result.id}`);
-    console.log(`\n? Please check your inbox at: ${emailTo}`);
+    console.log(`\n[INFO] Please check your inbox at: ${emailTo}`);
     console.log('   (Don\'t forget to check spam/junk folder if you don\'t see it)\n');
     
     console.log('=== Email Test Completed ===');
   } catch (error) {
-    console.error('? Failed to send test email:', error.message);
+    console.error('[ERROR] Failed to send test email:', error.message);
     
     if (error.message.includes('403')) {
-      console.error('\n? Tip: Make sure your EMAIL_FROM domain is verified in Resend');
+      console.error('\n[TIP] Make sure your EMAIL_FROM domain is verified in Resend');
       console.error('   Or use "onboarding@resend.dev" for testing');
     }
     
@@ -84,9 +72,9 @@ async function sendTestEmail() {
 }
 
 /**
- * Build test email body with current prices
+ * Build test email body with current prices from CoinGecko
  */
-function buildTestEmailBody(prices) {
+function buildTestEmailBody(marketData) {
   const timestamp = new Date().toLocaleString('zh-CN', { 
     timeZone: 'Asia/Shanghai',
     year: 'numeric',
@@ -101,6 +89,7 @@ function buildTestEmailBody(prices) {
     'Hello!',
     '',
     'This is a test email from your Crypto Volatility Alert Service.',
+    'Now using CoinGecko API for better reliability!',
     '',
     '============================================================',
     '',
@@ -111,16 +100,25 @@ function buildTestEmailBody(prices) {
   ];
   
   // Add price information
-  for (const [symbol, price] of Object.entries(prices)) {
+  const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
+  for (const symbol of symbols) {
     const coin = symbol.replace('USDT', '');
-    if (price !== null) {
-      lines.push(`  ${coin.padEnd(8)} | $${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+    const data = marketData[symbol];
+    
+    if (data && data.price) {
+      const sign = data.change24h >= 0 ? '+' : '';
+      lines.push(`  ${coin.padEnd(8)} | $${data.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+      lines.push(`             24h change: ${sign}${data.change24h.toFixed(2)}%`);
+      if (data.high24h && data.low24h) {
+        lines.push(`             24h range: $${data.low24h.toFixed(2)} - $${data.high24h.toFixed(2)}`);
+      }
+      lines.push('');
     } else {
       lines.push(`  ${coin.padEnd(8)} | [Failed to fetch - please check logs]`);
+      lines.push('');
     }
   }
   
-  lines.push('');
   lines.push('------------------------------------------------------------');
   lines.push('');
   lines.push(`Timestamp: ${timestamp} (Asia/Shanghai)`);
@@ -130,15 +128,27 @@ function buildTestEmailBody(prices) {
   lines.push('CONFIGURATION STATUS');
   lines.push('');
   lines.push('  [OK] Email service: Working');
-  lines.push('  [OK] Binance API: Working');
-  lines.push('  [' + (Object.values(prices).every(p => p !== null) ? 'OK' : 'WARN') + '] Price fetching: ' + (Object.values(prices).every(p => p !== null) ? 'All OK' : 'Partial failures'));
+  lines.push('  [OK] CoinGecko API: Working');
+  
+  const allOk = symbols.every(s => marketData[s] && marketData[s].price);
+  lines.push('  [' + (allOk ? 'OK' : 'WARN') + '] Price fetching: ' + (allOk ? 'All OK' : 'Partial failures'));
+  
   lines.push('');
   lines.push('Your crypto volatility monitoring service is ready!');
   lines.push('');
   lines.push('The system will automatically:');
-  lines.push('  - Monitor price changes every 5 minutes');
+  lines.push('  - Monitor 24-hour price changes every 5 minutes');
   lines.push('  - Send alerts when volatility reaches 6%, 8%, 10%, etc.');
-  lines.push('  - Reset daily at 00:00 (Asia/Shanghai timezone)');
+  lines.push('  - Use CoinGecko API for reliable data access');
+  lines.push('  - Reset thresholds daily at 00:00 (Asia/Shanghai timezone)');
+  lines.push('');
+  lines.push('------------------------------------------------------------');
+  lines.push('');
+  lines.push('WHAT CHANGED:');
+  lines.push('  - Switched from Binance to CoinGecko API');
+  lines.push('  - Now monitors 24-hour percentage changes');
+  lines.push('  - Better compatibility with GitHub Actions');
+  lines.push('  - More reliable price data fetching');
   lines.push('');
   lines.push('------------------------------------------------------------');
   lines.push('');
@@ -159,4 +169,3 @@ sendTestEmail().catch(error => {
   console.error('Fatal error:', error);
   process.exit(1);
 });
-
