@@ -1,5 +1,5 @@
 const BINANCE_API_BASE = 'https://api.binance.com';
-const REQUEST_TIMEOUT = 10000; // 10 seconds
+const REQUEST_TIMEOUT = 30000; // 30 seconds (increased for GitHub Actions)
 
 /**
  * Fetch with timeout
@@ -21,10 +21,10 @@ async function fetchWithTimeout(url, timeout = REQUEST_TIMEOUT) {
 /**
  * Get current price for a symbol from Binance with retry
  * @param {string} symbol - Trading pair symbol (e.g., 'BTCUSDT')
- * @param {number} retries - Number of retry attempts (default: 2)
+ * @param {number} retries - Number of retry attempts (default: 3)
  * @returns {Promise<number|null>} Current price or null if failed
  */
-export async function getCurrentPrice(symbol, retries = 2) {
+export async function getCurrentPrice(symbol, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const url = `${BINANCE_API_BASE}/api/v3/ticker/price?symbol=${symbol}`;
@@ -39,8 +39,9 @@ export async function getCurrentPrice(symbol, retries = 2) {
         
         // If not the last attempt, wait and retry
         if (attempt < retries) {
-          console.log(`   Retrying in 1 second...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const waitTime = 2000 * attempt; // Progressive delay: 2s, 4s, 6s...
+          console.log(`   Retrying in ${waitTime/1000} seconds...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
         }
         return null;
