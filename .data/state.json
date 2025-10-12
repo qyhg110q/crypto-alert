@@ -1,18 +1,16 @@
 {
-  "date": "2025-10-12",
+  "date": "2025-10-13",
   "tz": "Asia/Shanghai",
+  "mode": "24h",
   "symbols": {
     "BTCUSDT": {
-      "openPrice": null,
       "nextThresholdPct": 6
     },
     "ETHUSDT": {
-      "openPrice": null,
       "nextThresholdPct": 8
     },
     "BNBUSDT": {
-      "openPrice": null,
-      "nextThresholdPct": 14
+      "nextThresholdPct": 12
     }
   }
 }
