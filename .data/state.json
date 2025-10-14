@@ -1,5 +1,5 @@
 {
-  "date": "2025-10-14",
+  "date": "2025-10-15",
   "tz": "Asia/Shanghai",
   "mode": "24h",
   "symbols": {
@@ -10,7 +10,7 @@
       "nextThresholdPct": 6
     },
     "BNBUSDT": {
-      "nextThresholdPct": 14
+      "nextThresholdPct": 6
     }
   }
 }
