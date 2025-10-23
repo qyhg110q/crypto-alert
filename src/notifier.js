@@ -41,6 +41,68 @@ export async function sendNotification(triggers, date) {
 }
 
 /**
+ * Send hyperdash fills email
+ * @param {Record<string, Array<object>>} addressToFills - map of address -> fills[]
+ * @returns {Promise<boolean>}
+ */
+export async function sendHyperdashFillsEmail(addressToFills) {
+  const emailTo = process.env.EMAIL_TO;
+  const emailFrom = process.env.EMAIL_FROM;
+  if (!emailTo || !emailFrom) {
+    console.error('EMAIL_TO or EMAIL_FROM not configured');
+    return false;
+  }
+
+  const total = Object.values(addressToFills).reduce((acc, arr) => acc + (arr?.length || 0), 0);
+  if (total === 0) return true;
+
+  const subject = `[Hyperdash Fills] ${total} new fills across ${Object.keys(addressToFills).length} address(es)`;
+  const body = buildFillsBody(addressToFills);
+
+  try {
+    const result = await resend.emails.send({ from: emailFrom, to: emailTo, subject, text: body });
+    console.log('Fills email sent:', result.id);
+    return true;
+  } catch (e) {
+    console.error('Failed to send fills email:', e.message);
+    return false;
+  }
+}
+
+function buildFillsBody(addressToFills) {
+  const timestamp = new Date().toLocaleString('zh-CN', {
+    timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+
+  const lines = [
+    'Hyperdash User Fills',
+    '='.repeat(60),
+    ''
+  ];
+
+  for (const [address, fills] of Object.entries(addressToFills)) {
+    if (!fills || fills.length === 0) continue;
+    lines.push(`Address: ${address}`);
+    lines.push('------------------------------------------------------------');
+    for (const f of fills.sort((a,b)=>a.timestamp-b.timestamp)) {
+      const when = new Date(f.timestamp).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+      const side = (f.side || '').toUpperCase();
+      const sym = (f.symbol || '').toUpperCase();
+      lines.push(`  ${when}  ${sym.padEnd(8)}  ${side.padEnd(4)}  px=$${(f.price||0).toFixed(4)}  sz=${f.size}`);
+    }
+    lines.push('');
+  }
+
+  lines.push('='.repeat(60));
+  lines.push('');
+  lines.push(`Timestamp: ${timestamp} (Asia/Shanghai)`);
+  lines.push('');
+  lines.push('This is an automated notification for Hyperdash user fills.');
+  return lines.join('\n');
+}
+
+/**
  * Build email subject line
  * @param {object[]} triggers - Array of trigger objects
  * @param {string} date - Date string

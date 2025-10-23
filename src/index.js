@@ -1,7 +1,9 @@
 import { getLocalDateStr } from './time.js';
 import { getMarketData } from './coingecko.js';
+import { getUserFills } from './hyperdash.js';
+import { readHyperdashState, writeHyperdashState, ensureAddress, updateAddressProgress } from './hyperdash_state.js';
 import { readState, writeState, createInitialStateFor24h } from './state.js';
-import { sendNotification } from './notifier.js';
+import { sendNotification, sendHyperdashFillsEmail } from './notifier.js';
 
 // Configuration
 const TIMEZONE = 'Asia/Shanghai';
@@ -122,6 +124,9 @@ async function main() {
     console.error('[ERROR] Failed to save state');
   }
   
+  // Run Hyperdash fills monitor
+  await monitorHyperdashFills();
+
   console.log('\n=== Crypto Volatility Monitor Completed ===');
 }
 
@@ -130,3 +135,31 @@ main().catch(error => {
   console.error('Fatal error:', error);
   process.exit(1);
 });
+
+// Hyperdash fills monitor (invoked within the same run)
+async function monitorHyperdashFills() {
+  const addrsEnv = process.env.HYPERDASH_ADDRESSES || '0xc2a30212a8ddac9e123944d6e29faddce994e5f2,0xb317d2bc2d3d2df5fa441b5bae0ab9d8b07283ae';
+  const addresses = addrsEnv.split(',').map(s => s.trim()).filter(Boolean);
+  if (addresses.length === 0) return;
+
+  console.log('\n=== Hyperdash Fills Monitor ===');
+  const state = await readHyperdashState();
+  const addressToFills = {};
+
+  for (const addr of addresses) {
+    const aState = ensureAddress(state, addr);
+    console.log(`Fetching fills for ${addr} (lastTimestamp=${aState.lastTimestamp})`);
+    const fills = await getUserFills(addr, { limit: 100 });
+    if (!fills || fills.length === 0) continue;
+    const newOnes = fills.filter(f => (f.timestamp > (aState.lastTimestamp || 0)) && (!aState.seenIds || !aState.seenIds.includes(f.fillId)));
+    if (newOnes.length > 0) {
+      addressToFills[addr] = newOnes;
+      updateAddressProgress(aState, newOnes);
+    }
+  }
+
+  const sent = await sendHyperdashFillsEmail(addressToFills);
+  if (sent) {
+    await writeHyperdashState(state);
+  }
+}
