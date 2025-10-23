@@ -27,18 +27,79 @@ export async function writeHyperdashState(state) {
 
 export function ensureAddress(state, address) {
   if (!state.addresses[address]) {
-    state.addresses[address] = { lastTimestamp: 0, seenIds: [] };
+    state.addresses[address] = { positions: {} };
   }
   return state.addresses[address];
 }
 
-export function updateAddressProgress(addrState, fills) {
-  if (!fills || fills.length === 0) return;
-  const latestTs = Math.max(...fills.map(f => f.timestamp));
-  addrState.lastTimestamp = Math.max(addrState.lastTimestamp || 0, latestTs);
-  const ids = new Set([...(addrState.seenIds || []), ...fills.map(f => f.fillId).filter(Boolean)]);
-  // cap to recent 200 ids
-  addrState.seenIds = Array.from(ids).slice(-200);
+/**
+ * Compare current positions with previous snapshot
+ * Returns: { added: [], removed: [], changed: [] }
+ */
+export function comparePositions(oldPositions, newPositions) {
+  const result = { added: [], removed: [], changed: [] };
+  
+  const oldMap = new Map();
+  const newMap = new Map();
+  
+  (oldPositions || []).forEach(p => oldMap.set(p.coin, p));
+  (newPositions || []).forEach(p => newMap.set(p.coin, p));
+  
+  // Check for added coins
+  for (const [coin, newPos] of newMap) {
+    if (!oldMap.has(coin)) {
+      result.added.push(newPos);
+    }
+  }
+  
+  // Check for removed coins
+  for (const [coin, oldPos] of oldMap) {
+    if (!newMap.has(coin)) {
+      result.removed.push(oldPos);
+    }
+  }
+  
+  // Check for changed positions
+  for (const [coin, newPos] of newMap) {
+    const oldPos = oldMap.get(coin);
+    if (oldPos && hasPositionChanged(oldPos, newPos)) {
+      result.changed.push({ old: oldPos, new: newPos });
+    }
+  }
+  
+  return result;
+}
+
+/**
+ * Check if position has significant changes
+ */
+function hasPositionChanged(oldPos, newPos) {
+  // Check if szi or positionValue changed
+  if (oldPos.szi !== newPos.szi) return true;
+  if (Math.abs(oldPos.positionValue - newPos.positionValue) > 0.01) return true;
+  
+  // Check if entryPx changed significantly (>0.01%)
+  if (Math.abs((oldPos.entryPx - newPos.entryPx) / oldPos.entryPx) > 0.0001) return true;
+  
+  return false;
+}
+
+/**
+ * Update address state with new positions
+ */
+export function updateAddressPositions(addrState, positions) {
+  addrState.positions = {};
+  positions.forEach(p => {
+    addrState.positions[p.coin] = {
+      szi: p.szi,
+      positionValue: p.positionValue,
+      entryPx: p.entryPx,
+      unrealizedPnl: p.unrealizedPnl,
+      liquidationPx: p.liquidationPx,
+      leverage: p.leverage,
+      leverageType: p.leverageType
+    };
+  });
 }
 
 

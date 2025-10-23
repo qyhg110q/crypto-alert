@@ -1,6 +1,4 @@
 const HYPERLIQUID_INFO = 'https://api.hyperliquid.xyz/info';
-const HYPERETH_FILLS = 'https://api.hypereth.io/v2/hyperliquid/getUserFills';
-
 const REQUEST_TIMEOUT = 30000;
 
 async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
@@ -16,76 +14,85 @@ async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
   }
 }
 
-function getProvider() {
-  const p = (process.env.HYPERDASH_PROVIDER || 'hyperliquid').toLowerCase();
-  return p === 'hypereth' ? 'hypereth' : 'hyperliquid';
-}
-
-export async function getUserFills(address, { limit = 100, retries = 3 } = {}) {
-  const provider = getProvider();
-
+/**
+ * Get clearinghouse state (positions) for a user
+ * @param {string} address - User address
+ * @param {number} retries - Retry attempts
+ * @returns {Promise<Array>} Array of normalized positions
+ */
+export async function getClearinghouseState(address, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      if (provider === 'hypereth') {
-        const url = `${HYPERETH_FILLS}?address=${address}&limit=${limit}`;
-        const headers = {};
-        const apiKey = process.env.HYPERETH_API_KEY;
-        if (apiKey) headers['X-API-KEY'] = apiKey;
-
-        const res = await fetchWithTimeout(url, { headers });
-        if (!res.ok) {
-          const text = await res.text();
-          console.error(`[hypereth] ${address} ${res.status} ${res.statusText} body=${text}`);
-          throw new Error(`hypereth ${res.status}`);
-        }
-        const data = await res.json();
-        const fills = Array.isArray(data.fills) ? data.fills : data;
-        return normalizeFills(fills);
-      } else {
-        // hyperliquid info endpoint: POST { type: 'userFills', user: address, n: limit }
-        const body = { type: 'userFills', user: address, n: limit };
-        const res = await fetchWithTimeout(HYPERLIQUID_INFO, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        if (!res.ok) {
-          const text = await res.text();
-          console.error(`[hyperliquid] ${address} ${res.status} ${res.statusText} body=${text}`);
-          throw new Error(`hyperliquid ${res.status}`);
-        }
-        const data = await res.json();
-        const fills = Array.isArray(data) ? data : data.fills;
-        return normalizeFills(fills);
+      const body = { type: 'clearinghouseState', user: address };
+      const res = await fetchWithTimeout(HYPERLIQUID_INFO, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      
+      if (!res.ok) {
+        const text = await res.text();
+        console.error(`[clearinghouseState] ${address} ${res.status} ${res.statusText} body=${text}`);
+        throw new Error(`clearinghouseState ${res.status}`);
       }
+      
+      const data = await res.json();
+      if (!data || !data.assetPositions) {
+        console.error(`[clearinghouseState] Invalid response for ${address}:`, data);
+        return [];
+      }
+      
+      return normalizePositions(data.assetPositions);
+      
     } catch (err) {
       if (attempt < retries) {
         const wait = 2000 * attempt;
-        console.warn(`getUserFills retry ${attempt}/${retries} in ${wait}ms: ${err.message}`);
+        console.warn(`getClearinghouseState retry ${attempt}/${retries} in ${wait}ms: ${err.message}`);
         await new Promise(r => setTimeout(r, wait));
         continue;
       }
-      console.error(`getUserFills failed for ${address}: ${err.message}`);
+      console.error(`getClearinghouseState failed for ${address}: ${err.message}`);
       return [];
     }
   }
   return [];
 }
 
-function normalizeFills(raw) {
-  if (!Array.isArray(raw)) return [];
-  return raw.map((f) => ({
-    fillId: f.fillId || f.id || f.hash || `${f.orderId || ''}-${f.timestamp || ''}-${f.tradeId || ''}`,
-    symbol: f.coin || f.symbol || f.asset || '',
-    side: f.side || (f.isBuy ? 'buy' : (f.isSell ? 'sell' : '')),
-    price: Number(f.px || f.price || f.avgPrice || 0),
-    size: Number(f.sz || f.quantity || f.qty || 0),
-    quote: Number(f.notional || f.quoteQuantity || 0),
-    fee: Number(f.fee || 0),
-    feeAsset: f.feeAsset || 'USDT',
-    isMaker: Boolean(f.isMaker),
-    timestamp: Number(f.time || f.timestamp || f.ts || 0)
-  })).filter(x => x.timestamp > 0 && x.price > 0 && x.size >= 0);
+/**
+ * Normalize position data from clearinghouseState
+ * @param {Array} assetPositions - Raw asset positions from API
+ * @returns {Array} Normalized positions
+ */
+function normalizePositions(assetPositions) {
+  if (!Array.isArray(assetPositions)) return [];
+  
+  return assetPositions.map(ap => {
+    const pos = ap.position;
+    if (!pos) return null;
+    
+    const coin = pos.coin || '';
+    const szi = Number(pos.szi || 0);
+    const positionValue = Number(pos.positionValue || 0);
+    const entryPx = Number(pos.entryPx || 0);
+    const unrealizedPnl = Number(pos.unrealizedPnl || 0);
+    const liquidationPx = pos.liquidationPx ? Number(pos.liquidationPx) : null;
+    
+    // leverage info
+    const leverage = pos.leverage || {};
+    const leverageValue = Number(leverage.value || 0);
+    const leverageType = leverage.type || 'cross'; // cross or isolated
+    
+    return {
+      coin,
+      szi,
+      positionValue,
+      entryPx,
+      unrealizedPnl,
+      liquidationPx,
+      leverage: leverageValue,
+      leverageType
+    };
+  }).filter(p => p && p.coin && p.szi !== 0); // Filter out null and zero positions
 }
 
 

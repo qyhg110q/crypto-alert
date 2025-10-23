@@ -1,19 +1,33 @@
-# Hyperdash 成交监听功能
+# Hyperdash 仓位监控功能
 
 ## 功能说明
 
-监听 Hyperliquid 上指定地址的用户成交（userFills），并通过邮件通知新增成交记录。
+监听 Hyperliquid 上指定地址的仓位变化（clearinghouseState），并通过邮件通知：
+- **新开仓位**：检测到新的持仓 coin
+- **平仓**：检测到 coin 持仓消失
+- **仓位变化**：检测到 szi（合约张数）或 positionValue（头寸名义）变化
 
 ### 默认监听地址
 - `0xc2a30212a8ddac9e123944d6e29faddce994e5f2`
 - `0xb317d2bc2d3d2df5fa441b5bae0ab9d8b07283ae`
 
+### 监控数据
+- **coin**：资产/交易对
+- **szi**：合约张数（正数=多仓，负数=空仓）
+- **positionValue**：头寸名义价值
+- **entryPx**：入场均价
+- **unrealizedPnl**：未实现盈亏
+- **liquidationPx**：预估强平价
+- **leverage**：当前杠杆倍数
+- **leverageType**：杠杆类型（cross 全仓 / isolated 逐仓）
+
 ### 特性
-- ? 自动去重（基于时间戳与成交 ID）
+- ? 自动检测新开仓位
+- ? 自动检测平仓
+- ? 自动检测仓位变化（加仓/减仓/换仓）
 - ? 状态持久化（`.data/hyperdash.json`）
 - ? 自动重试（3 次，渐进式延迟）
-- ? 按地址分组的邮件通知
-- ? 支持 Hyperliquid 与 Hypereth 两种 API
+- ? 按地址独立通知
 
 ## 配置
 
@@ -22,49 +36,63 @@
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
 | `HYPERDASH_ADDRESSES` | 监听的地址列表（逗号分隔） | 内置两个地址 |
-| `HYPERDASH_PROVIDER` | API 提供商：`hyperliquid` 或 `hypereth` | `hyperliquid` |
-| `HYPERETH_API_KEY` | Hypereth API 密钥（仅 provider=hypereth 时需要） | - |
 | `RESEND_API_KEY` | Resend 邮件 API 密钥 | **必需** |
 | `EMAIL_TO` | 接收邮件地址 | **必需** |
 | `EMAIL_FROM` | 发送邮件地址 | **必需** |
 
-### API 提供商对比
+### API 说明
 
-#### Hyperliquid（默认，推荐）
+使用 Hyperliquid 官方 API：
 - **端点**：`https://api.hyperliquid.xyz/info`
 - **方法**：POST
+- **请求体**：`{ "type": "clearinghouseState", "user": "0x地址" }`
 - **无需 API Key**
 - **限流**：宽松
-
-#### Hypereth
-- **端点**：`https://api.hypereth.io/v2/hyperliquid/getUserFills`
-- **方法**：GET
-- **需要 API Key**（在 headers 中配置 `X-API-KEY`）
-- **限流**：根据套餐
 
 ## 使用方法
 
 ### 1. 本地测试
 
-测试能否获取历史成交数据：
+测试能否获取仓位数据：
 
 ```bash
 node test-hyperdash.js
 ```
 
-**预期输出：**
+**预期输出（有持仓时）：**
 ```
-Address 0xc2a30212a8ddac9e123944d6e29faddce994e5f2 lastTimestamp=0
-Fetched 50 fills
-New fills: 50
-2025-10-23T01:28:55.066Z BTC B px=108150 sz=0.33897
-2025-10-23T01:28:55.066Z BTC B px=108150 sz=0.0001
-...
+Address: 0xc2a30212a8ddac9e123944d6e29faddce994e5f2
+------------------------------------------------------------
+  Found 2 position(s):
+
+  BTC:
+    Direction: LONG
+    Size: 0.5000 contracts
+    Position Value: $54100.00
+    Entry Price: $108200.0000
+    Unrealized PnL: $150.00
+    Liquidation Price: $102000.0000
+    Leverage: 2.0x (cross)
+
+  ETH:
+    Direction: SHORT
+    Size: 5.0000 contracts
+    Position Value: $19100.00
+    Entry Price: $3820.0000
+    Unrealized PnL: -$50.00
+    Leverage: 3.0x (isolated)
+```
+
+**预期输出（无持仓时）：**
+```
+Address: 0xc2a30212a8ddac9e123944d6e29faddce994e5f2
+------------------------------------------------------------
+  No open positions
 ```
 
 ### 2. 完整流程测试
 
-运行主程序（包含价格监控和成交监听）：
+运行主程序（包含价格监控和仓位监控）：
 
 ```bash
 # Windows PowerShell
@@ -82,9 +110,9 @@ npm start
 
 ### 3. GitHub Actions 自动运行
 
-成交监听已集成到主 workflow（`.github/workflows/volatility-alert.yml`）：
+仓位监控已集成到主 workflow（`.github/workflows/volatility-alert.yml`）：
 - 每 5 分钟自动运行
-- 拉取新成交 → 去重 → 发送邮件 → 更新状态
+- 拉取仓位 → 比对变化 → 发送邮件 → 更新状态
 - 状态文件自动提交回仓库
 
 ### 4. 自定义监听地址
@@ -109,30 +137,54 @@ const addrsEnv = process.env.HYPERDASH_ADDRESSES || '你的地址1,你的地址2';
 
 ## 邮件格式
 
-成交邮件示例：
-
+### 新开仓位
 ```
-Subject: [Hyperdash Fills] 15 new fills across 2 address(es)
+Subject: [Hyperdash Position] 2 opened - 0xc2a3...e5f2
 
-Hyperdash User Fills
-============================================================
-
-Address: 0xc2a30212a8ddac9e123944d6e29faddce994e5f2
+NEW POSITIONS OPENED:
 ------------------------------------------------------------
-  2025/10/23 09:28:55  BTC       BUY   px=$108150.0000  sz=0.33897
-  2025/10/23 09:28:54  BTC       BUY   px=$108150.0000  sz=1.0
-  2025/10/23 09:28:53  ETH       SELL  px=$3819.6000   sz=0.5
+  BTC
+    Size: LONG 0.5000 contracts
+    Position Value: $54100.00
+    Entry Price: $108200.0000
+    Unrealized PnL: $0.00
+    Liquidation Price: $102000.0000
+    Leverage: 2.0x (cross)
 
-Address: 0xb317d2bc2d3d2df5fa441b5bae0ab9d8b07283ae
+  ETH
+    Size: SHORT 5.0000 contracts
+    Position Value: $19100.00
+    Entry Price: $3820.0000
+    Unrealized PnL: $0.00
+    Leverage: 3.0x (isolated)
+```
+
+### 平仓
+```
+Subject: [Hyperdash Position] 1 closed - 0xc2a3...e5f2
+
+POSITIONS CLOSED:
 ------------------------------------------------------------
-  2025/10/23 09:12:39  BTC       BUY   px=$108250.0000  sz=0.15409
-  ...
+  BTC
+    Closed Size: LONG 0.5000 contracts
+    Last Value: $54250.00
+    Entry Price: $108200.0000
+    Final PnL: $150.00
+```
 
-============================================================
+### 仓位变化
+```
+Subject: [Hyperdash Position] 1 changed - 0xc2a3...e5f2
 
-Timestamp: 2025/10/23 09:30:00 (Asia/Shanghai)
-
-This is an automated notification for Hyperdash user fills.
+POSITIONS CHANGED:
+------------------------------------------------------------
+  BTC
+    Size: LONG 0.5000 -> LONG 1.0000 (+0.5000)
+    Value: $54100.00 -> $108200.00 (+$54100.00)
+    Entry Px: $108200.0000 -> $108200.0000
+    Current PnL: $300.00
+    Liquidation Px: $102000.0000
+    Leverage: 2.0x (cross)
 ```
 
 ## 状态管理
@@ -145,33 +197,48 @@ This is an automated notification for Hyperdash user fills.
 {
   "addresses": {
     "0xc2a30212a8ddac9e123944d6e29faddce994e5f2": {
-      "lastTimestamp": 1729653535066,
-      "seenIds": [
-        "fill_abc123...",
-        "fill_def456..."
-      ]
-    },
-    "0xb317d2bc2d3d2df5fa441b5bae0ab9d8b07283ae": {
-      "lastTimestamp": 1729650759997,
-      "seenIds": [
-        "fill_xyz789..."
-      ]
+      "positions": {
+        "BTC": {
+          "szi": 0.5,
+          "positionValue": 54100.00,
+          "entryPx": 108200.0000,
+          "unrealizedPnl": 150.00,
+          "liquidationPx": 102000.0000,
+          "leverage": 2.0,
+          "leverageType": "cross"
+        },
+        "ETH": {
+          "szi": -5.0,
+          "positionValue": 19100.00,
+          "entryPx": 3820.0000,
+          "unrealizedPnl": -50.00,
+          "liquidationPx": null,
+          "leverage": 3.0,
+          "leverageType": "isolated"
+        }
+      }
     }
   }
 }
 ```
 
-### 去重机制
-1. **时间戳过滤**：只拉取 `timestamp > lastTimestamp` 的成交
-2. **ID 去重**：检查 `fillId` 是否在 `seenIds` 中
-3. **ID 缓存**：保留最近 200 个 `fillId`（避免状态文件过大）
+### 变化检测机制
+
+1. **新开仓**：当前仓位中出现新的 coin
+2. **平仓**：之前有的 coin 在当前仓位中消失
+3. **仓位变化**：
+   - `szi` 合约张数变化
+   - `positionValue` 头寸名义价值变化 > $0.01
+   - `entryPx` 入场均价变化 > 0.01%
 
 ### 重置状态
 
-如需重新获取所有历史成交，删除状态文件：
+如需重新初始化，删除状态文件：
 ```bash
 rm .data/hyperdash.json
 ```
+
+下次运行时会记录当前所有仓位作为初始状态，不会发送通知。
 
 ## 故障排查
 
@@ -182,15 +249,15 @@ rm .data/hyperdash.json
 # 测试 Hyperliquid API
 curl -X POST https://api.hyperliquid.xyz/info \
   -H "Content-Type: application/json" \
-  -d '{"type":"userFills","user":"0xc2a30212a8ddac9e123944d6e29faddce994e5f2","n":10}'
+  -d '{"type":"clearinghouseState","user":"0xc2a30212a8ddac9e123944d6e29faddce994e5f2"}'
 ```
 
 **可能原因：**
 - 地址格式错误（需要 `0x` 前缀）
-- 该地址无成交记录
-- API 限流
+- 该地址无持仓（正常情况）
+- API 限流（罕见）
 
-### 问题 2：重复通知
+### 问题 2：误报仓位变化
 
 **检查：**
 - `.data/hyperdash.json` 是否被正确更新
@@ -230,40 +297,56 @@ node test-hyperdash.js 2>&1 | tee hyperdash.log
 
 ### API 请求示例
 
-**Hyperliquid：**
 ```javascript
 POST https://api.hyperliquid.xyz/info
 Content-Type: application/json
 
 {
-  "type": "userFills",
-  "user": "0xc2a30212a8ddac9e123944d6e29faddce994e5f2",
-  "n": 100
+  "type": "clearinghouseState",
+  "user": "0xc2a30212a8ddac9e123944d6e29faddce994e5f2"
 }
 ```
 
-**Hypereth：**
+### API 响应结构
+
 ```javascript
-GET https://api.hypereth.io/v2/hyperliquid/getUserFills?address=0xc2a30212a8ddac9e123944d6e29faddce994e5f2&limit=100
-X-API-KEY: your_key_here
+{
+  "assetPositions": [
+    {
+      "position": {
+        "coin": "BTC",
+        "szi": "0.5",
+        "positionValue": "54100.00",
+        "entryPx": "108200.0000",
+        "unrealizedPnl": "150.00",
+        "liquidationPx": "102000.0000",
+        "leverage": {
+          "value": "2.0",
+          "type": "cross"
+        }
+      },
+      "type": "oneWay"
+    }
+  ],
+  "marginSummary": { ... },
+  ...
+}
 ```
 
 ### 数据归一化
 
-不同 API 返回的字段名不同，代码会自动归一化为统一格式：
+代码会自动归一化为统一格式：
 
 ```javascript
 {
-  fillId: string,     // 成交 ID
-  symbol: string,     // 交易对（如 "BTC"）
-  side: string,       // 方向（"buy" 或 "sell"）
-  price: number,      // 成交价格
-  size: number,       // 成交数量
-  quote: number,      // 成交金额
-  fee: number,        // 手续费
-  feeAsset: string,   // 手续费币种
-  isMaker: boolean,   // 是否 maker
-  timestamp: number   // 时间戳（毫秒）
+  coin: string,           // 资产名称
+  szi: number,            // 合约张数（正=多，负=空）
+  positionValue: number,  // 头寸名义价值
+  entryPx: number,        // 入场均价
+  unrealizedPnl: number,  // 未实现盈亏
+  liquidationPx: number|null, // 强平价（可能为 null）
+  leverage: number,       // 杠杆倍数
+  leverageType: string    // 'cross' 或 'isolated'
 }
 ```
 
@@ -275,52 +358,56 @@ X-API-KEY: your_key_here
 
 ### 性能考虑
 
-- 每次最多拉取 100 条成交
+- 每次拉取完整仓位快照
 - 请求间隔：单地址拉取完后立即处理下一个
-- 状态文件：仅保留最近 200 个 fillId
-- 邮件：所有地址的新成交汇总为一封邮件
+- 状态文件：存储所有 coin 的完整快照
+- 邮件：每个地址的变化独立发送邮件
 
 ## 常见问题
 
-### Q: 能监听其他链吗？
-A: 当前仅支持 Hyperliquid。如需其他链，需要修改 `src/hyperdash.js` 中的 API 端点。
+### Q: 能监听其他 DEX 吗？
+A: 当前仅支持 Hyperliquid。如需其他 DEX，需要修改 `src/hyperdash.js` 中的 API 端点。
 
-### Q: 能监听所有交易对吗？
-A: 是的，API 返回该地址的所有成交，自动包含所有交易对。
+### Q: 为什么首次运行不通知？
+A: 首次运行会记录当前仓位作为基准状态，从第二次运行开始才检测变化。
 
 ### Q: 最多能监听多少个地址？
-A: 理论上无限制，但建议不超过 10 个（避免 API 限流和邮件过长）。
+A: 理论上无限制，但建议不超过 10 个（避免 API 限流）。
 
-### Q: 能否只监听特定交易对？
-A: 需要修改代码过滤。在 `src/index.js` 的 `monitorHyperdashFills` 函数中添加：
+### Q: 如何过滤小额变化？
+A: 代码已内置过滤：
+- `positionValue` 变化 < $0.01 时不通知
+- `entryPx` 变化 < 0.01% 时不通知
+
+### Q: 能否只监听特定币种？
+A: 需要修改代码。在 `src/index.js` 的 `monitorHyperdashPositions` 函数中添加：
 ```javascript
-const newOnes = fills.filter(f => 
-  (f.timestamp > (aState.lastTimestamp || 0)) && 
-  (!aState.seenIds || !aState.seenIds.includes(f.fillId)) &&
-  (f.symbol === 'BTC' || f.symbol === 'ETH') // 只监听 BTC 和 ETH
+const currentPositions = await getClearinghouseState(addr);
+const filteredPositions = currentPositions.filter(p => 
+  p.coin === 'BTC' || p.coin === 'ETH' // 只监听 BTC 和 ETH
 );
 ```
 
-### Q: 能否按成交金额过滤？
-A: 同上，在过滤条件中添加：
-```javascript
-&& (f.quote >= 1000) // 只通知金额 >= 1000 的成交
-```
+### Q: 能否按盈亏阈值报警？
+A: 需要修改代码。在 `src/hyperdash_state.js` 的 `comparePositions` 函数中添加盈亏阈值检查。
+
+### Q: 为什么有时候 liquidationPx 是 null？
+A: 全仓模式（cross）或低杠杆时，强平价可能非常远或无法计算，API 返回 null。
 
 ## 相关文件
 
-- `src/hyperdash.js` - API 客户端
-- `src/hyperdash_state.js` - 状态管理
-- `src/notifier.js` - 邮件通知（`sendHyperdashFillsEmail`）
-- `src/index.js` - 主流程集成（`monitorHyperdashFills`）
+- `src/hyperdash.js` - API 客户端（getClearinghouseState）
+- `src/hyperdash_state.js` - 状态管理（comparePositions, updateAddressPositions）
+- `src/notifier.js` - 邮件通知（sendPositionChangeEmail）
+- `src/index.js` - 主流程集成（monitorHyperdashPositions）
 - `test-hyperdash.js` - 本地测试脚本
 - `crypto.plan.md` - 技术设计文档
 
 ## 更新日志
 
-- **2025-10-23**：初始版本
-  - 支持 Hyperliquid 和 Hypereth
-  - 自动去重与状态持久化
-  - 按地址分组的邮件通知
-  - 集成到主 workflow
-
+- **2025-10-23**：V2.0 仓位监控版本
+  - **重大变更**：从成交监听改为仓位监控
+  - 监控 clearinghouseState API
+  - 检测新开仓、平仓、仓位变化
+  - 显示完整仓位信息（szi, positionValue, entryPx, PnL, 强平价, 杠杆）
+  - 优化变化检测算法

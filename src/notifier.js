@@ -191,3 +191,145 @@ function buildBody(triggers) {
   return lines.join('\n');
 }
 
+/**
+ * Send email notification for position changes
+ * @param {string} address - Address
+ * @param {object} changes - { added: [], removed: [], changed: [] }
+ * @returns {Promise<boolean>}
+ */
+export async function sendPositionChangeEmail(address, changes) {
+  const emailTo = process.env.EMAIL_TO;
+  const emailFrom = process.env.EMAIL_FROM;
+
+  if (!emailTo || !emailFrom) {
+    console.error('[notifier] EMAIL_TO or EMAIL_FROM not configured');
+    return false;
+  }
+
+  const total = changes.added.length + changes.removed.length + changes.changed.length;
+  if (total === 0) return true; // No changes, no email
+
+  const subject = buildPositionSubject(address, changes);
+  const body = buildPositionBody(address, changes);
+
+  try {
+    const result = await resend.emails.send({
+      from: emailFrom,
+      to: emailTo,
+      subject: subject,
+      text: body
+    });
+    console.log('[notifier] Position email sent:', result.id);
+    return true;
+  } catch (err) {
+    console.error('[notifier] Failed to send position email:', err.message);
+    return false;
+  }
+}
+
+function buildPositionSubject(address, changes) {
+  const parts = [];
+  if (changes.added.length > 0) parts.push(`${changes.added.length} opened`);
+  if (changes.removed.length > 0) parts.push(`${changes.removed.length} closed`);
+  if (changes.changed.length > 0) parts.push(`${changes.changed.length} changed`);
+  const shortAddr = `${address.slice(0, 6)}...${address.slice(-4)}`;
+  return `[Hyperdash Position] ${parts.join(', ')} - ${shortAddr}`;
+}
+
+function buildPositionBody(address, changes) {
+  const timestamp = new Date().toLocaleString('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+
+  const lines = [
+    'Hyperdash Position Changes Alert',
+    '='.repeat(60),
+    '',
+    `Address: ${address}`,
+    `Time: ${timestamp} (Asia/Shanghai)`,
+    ''
+  ];
+
+  // New positions
+  if (changes.added.length > 0) {
+    lines.push('NEW POSITIONS OPENED:');
+    lines.push('-'.repeat(60));
+    changes.added.forEach(p => {
+      lines.push(`  ${p.coin}`);
+      lines.push(`    Size: ${p.szi > 0 ? 'LONG' : 'SHORT'} ${Math.abs(p.szi).toFixed(4)} contracts`);
+      lines.push(`    Position Value: $${Math.abs(p.positionValue).toFixed(2)}`);
+      lines.push(`    Entry Price: $${p.entryPx.toFixed(4)}`);
+      lines.push(`    Unrealized PnL: $${p.unrealizedPnl.toFixed(2)}`);
+      if (p.liquidationPx) {
+        lines.push(`    Liquidation Price: $${p.liquidationPx.toFixed(4)}`);
+      }
+      lines.push(`    Leverage: ${p.leverage.toFixed(1)}x (${p.leverageType})`);
+      lines.push('');
+    });
+  }
+
+  // Closed positions
+  if (changes.removed.length > 0) {
+    lines.push('POSITIONS CLOSED:');
+    lines.push('-'.repeat(60));
+    changes.removed.forEach(p => {
+      lines.push(`  ${p.coin}`);
+      lines.push(`    Closed Size: ${p.szi > 0 ? 'LONG' : 'SHORT'} ${Math.abs(p.szi).toFixed(4)} contracts`);
+      lines.push(`    Last Value: $${Math.abs(p.positionValue).toFixed(2)}`);
+      lines.push(`    Entry Price: $${p.entryPx.toFixed(4)}`);
+      lines.push(`    Final PnL: $${p.unrealizedPnl.toFixed(2)}`);
+      lines.push('');
+    });
+  }
+
+  // Changed positions
+  if (changes.changed.length > 0) {
+    lines.push('POSITIONS CHANGED:');
+    lines.push('-'.repeat(60));
+    changes.changed.forEach(({ old, new: newPos }) => {
+      lines.push(`  ${newPos.coin}`);
+      
+      // Size change
+      if (old.szi !== newPos.szi) {
+        const oldDir = old.szi > 0 ? 'LONG' : 'SHORT';
+        const newDir = newPos.szi > 0 ? 'LONG' : 'SHORT';
+        const sizeDiff = newPos.szi - old.szi;
+        const sizeChangeSign = sizeDiff > 0 ? '+' : '';
+        lines.push(`    Size: ${oldDir} ${Math.abs(old.szi).toFixed(4)} -> ${newDir} ${Math.abs(newPos.szi).toFixed(4)} (${sizeChangeSign}${sizeDiff.toFixed(4)})`);
+      }
+      
+      // Position value change
+      if (Math.abs(old.positionValue - newPos.positionValue) > 0.01) {
+        const valueDiff = newPos.positionValue - old.positionValue;
+        const valueChangeSign = valueDiff > 0 ? '+' : '';
+        lines.push(`    Value: $${Math.abs(old.positionValue).toFixed(2)} -> $${Math.abs(newPos.positionValue).toFixed(2)} (${valueChangeSign}$${valueDiff.toFixed(2)})`);
+      }
+      
+      // Entry price change (averaging)
+      if (Math.abs(old.entryPx - newPos.entryPx) > 0.0001) {
+        lines.push(`    Entry Px: $${old.entryPx.toFixed(4)} -> $${newPos.entryPx.toFixed(4)}`);
+      }
+      
+      lines.push(`    Current PnL: $${newPos.unrealizedPnl.toFixed(2)}`);
+      if (newPos.liquidationPx) {
+        lines.push(`    Liquidation Px: $${newPos.liquidationPx.toFixed(4)}`);
+      }
+      lines.push(`    Leverage: ${newPos.leverage.toFixed(1)}x (${newPos.leverageType})`);
+      lines.push('');
+    });
+  }
+
+  lines.push('='.repeat(60));
+  lines.push('');
+  lines.push('This is an automated notification for Hyperdash position changes.');
+  lines.push('It monitors your Hyperliquid positions every 5 minutes.');
+
+  return lines.join('\n');
+}
+
