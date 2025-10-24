@@ -37,7 +37,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add .data/state.json
-          git diff --cached --quiet || git commit -m "Update volatility state [skip ci]"
+          git add .data/state.json .data/hyperdash.json
+          git diff --cached --quiet || git commit -m "Update state [skip ci]"
           git push
 
