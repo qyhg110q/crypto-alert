@@ -27,7 +27,10 @@ export async function writeHyperdashState(state) {
 
 export function ensureAddress(state, address) {
   if (!state.addresses[address]) {
-    state.addresses[address] = { positions: {} };
+    state.addresses[address] = { 
+      positions: {},           // Current positions (updated every run)
+      lastNotifiedPositions: {} // Positions at last notification (baseline for comparison)
+    };
   }
   return state.addresses[address];
 }
@@ -95,12 +98,31 @@ function hasPositionChanged(oldPos, newPos) {
 }
 
 /**
- * Update address state with new positions
+ * Update address state with new positions (called every run)
  */
 export function updateAddressPositions(addrState, positions) {
   addrState.positions = {};
   positions.forEach(p => {
     addrState.positions[p.coin] = {
+      szi: p.szi,
+      positionValue: p.positionValue,
+      entryPx: p.entryPx,
+      unrealizedPnl: p.unrealizedPnl,
+      liquidationPx: p.liquidationPx,
+      leverage: p.leverage,
+      leverageType: p.leverageType
+    };
+  });
+}
+
+/**
+ * Update lastNotifiedPositions baseline (only called after successful notification)
+ * This sets the baseline for the NEXT notification
+ */
+export function updateLastNotifiedPositions(addrState, positions) {
+  addrState.lastNotifiedPositions = {};
+  positions.forEach(p => {
+    addrState.lastNotifiedPositions[p.coin] = {
       szi: p.szi,
       positionValue: p.positionValue,
       entryPx: p.entryPx,

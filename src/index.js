@@ -1,7 +1,7 @@
 import { getLocalDateStr } from './time.js';
 import { getMarketData } from './coingecko.js';
 import { getClearinghouseState } from './hyperdash.js';
-import { readHyperdashState, writeHyperdashState, ensureAddress, comparePositions, updateAddressPositions } from './hyperdash_state.js';
+import { readHyperdashState, writeHyperdashState, ensureAddress, comparePositions, updateAddressPositions, updateLastNotifiedPositions } from './hyperdash_state.js';
 import { readState, writeState, createInitialStateFor24h } from './state.js';
 import { sendNotification, sendPositionChangeEmail } from './notifier.js';
 
@@ -156,14 +156,17 @@ async function monitorHyperdashPositions() {
       continue;
     }
     
-    // Convert stored positions to array for comparison
-    const oldPositions = Object.keys(aState.positions || {}).map(coin => ({
+    // Always update current positions (for tracking)
+    updateAddressPositions(aState, currentPositions);
+    
+    // Use lastNotifiedPositions as baseline for comparison (not current positions)
+    const baselinePositions = Object.keys(aState.lastNotifiedPositions || {}).map(coin => ({
       coin,
-      ...aState.positions[coin]
+      ...aState.lastNotifiedPositions[coin]
     }));
     
-    // Compare and detect changes
-    const changes = comparePositions(oldPositions, currentPositions);
+    // Compare current positions with LAST NOTIFIED baseline
+    const changes = comparePositions(baselinePositions, currentPositions);
     const totalChanges = changes.added.length + changes.removed.length + changes.changed.length;
     
     if (totalChanges > 0) {
@@ -172,14 +175,16 @@ async function monitorHyperdashPositions() {
       // Send notification
       const sent = await sendPositionChangeEmail(addr, changes);
       if (sent) {
-        // Update state with new positions
-        updateAddressPositions(aState, currentPositions);
+        // Update lastNotifiedPositions baseline for NEXT comparison
+        updateLastNotifiedPositions(aState, currentPositions);
+        console.log(`Updated notification baseline for ${addr}`);
       }
     } else {
       console.log(`No position changes for ${addr}`);
-      // Still update state in case of first run
-      if (Object.keys(aState.positions || {}).length === 0 && currentPositions.length > 0) {
-        updateAddressPositions(aState, currentPositions);
+      // First run: initialize baseline with current positions (no notification)
+      if (Object.keys(aState.lastNotifiedPositions || {}).length === 0 && currentPositions.length > 0) {
+        updateLastNotifiedPositions(aState, currentPositions);
+        console.log(`Initialized notification baseline for ${addr} (first run, no notification)`);
       }
     }
   }
