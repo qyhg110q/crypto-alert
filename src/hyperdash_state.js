@@ -72,21 +72,24 @@ export function comparePositions(oldPositions, newPositions) {
 
 /**
  * Check if position has significant changes
- * Threshold: positionValue change must exceed $5,000,000 to trigger notification
+ * Thresholds based on contract size (szi) change:
+ * - ETH: 3000 contracts
+ * - BTC: 100 contracts
+ * - Other coins: 1% of absolute position size
  */
 function hasPositionChanged(oldPos, newPos) {
-  const POSITION_VALUE_THRESHOLD = 5000000; // $5M
+  // Define thresholds per coin
+  const THRESHOLDS = {
+    'ETH': 3000,
+    'BTC': 100,
+  };
   
-  // Check if positionValue changed significantly (>$5M)
-  const valueDiff = Math.abs(oldPos.positionValue - newPos.positionValue);
-  if (valueDiff > POSITION_VALUE_THRESHOLD) return true;
+  // Get threshold for this coin, or use 1% of position as default
+  const threshold = THRESHOLDS[newPos.coin] || Math.abs(oldPos.szi) * 0.01;
   
-  // Check if szi changed AND positionValue change exceeds threshold
-  if (Math.abs(oldPos.szi - newPos.szi) > 0.0001 && valueDiff > POSITION_VALUE_THRESHOLD) return true;
-  
-  // Check if entryPx changed significantly (>0.5%) AND positionValue change exceeds threshold
-  // This catches averaging in/out scenarios
-  if (Math.abs((oldPos.entryPx - newPos.entryPx) / oldPos.entryPx) > 0.005 && valueDiff > POSITION_VALUE_THRESHOLD) return true;
+  // Check if szi changed significantly
+  const sziDiff = Math.abs(newPos.szi - oldPos.szi);
+  if (sziDiff > threshold) return true;
   
   return false;
 }
