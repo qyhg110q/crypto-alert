@@ -72,18 +72,21 @@ export function comparePositions(oldPositions, newPositions) {
 
 /**
  * Check if position has significant changes
+ * Threshold: positionValue change must exceed $5,000,000 to trigger notification
  */
 function hasPositionChanged(oldPos, newPos) {
-  // Check if szi changed (even small changes matter for position tracking)
-  if (Math.abs(oldPos.szi - newPos.szi) > 0.0001) return true;
+  const POSITION_VALUE_THRESHOLD = 5000000; // $5M
   
-  // Check if positionValue changed significantly (>$1 or >0.01%)
+  // Check if positionValue changed significantly (>$5M)
   const valueDiff = Math.abs(oldPos.positionValue - newPos.positionValue);
-  const valuePctChange = valueDiff / Math.abs(oldPos.positionValue);
-  if (valueDiff > 1 && valuePctChange > 0.0001) return true;
+  if (valueDiff > POSITION_VALUE_THRESHOLD) return true;
   
-  // Check if entryPx changed significantly (>0.01%)
-  if (Math.abs((oldPos.entryPx - newPos.entryPx) / oldPos.entryPx) > 0.0001) return true;
+  // Check if szi changed AND positionValue change exceeds threshold
+  if (Math.abs(oldPos.szi - newPos.szi) > 0.0001 && valueDiff > POSITION_VALUE_THRESHOLD) return true;
+  
+  // Check if entryPx changed significantly (>0.5%) AND positionValue change exceeds threshold
+  // This catches averaging in/out scenarios
+  if (Math.abs((oldPos.entryPx - newPos.entryPx) / oldPos.entryPx) > 0.005 && valueDiff > POSITION_VALUE_THRESHOLD) return true;
   
   return false;
 }
