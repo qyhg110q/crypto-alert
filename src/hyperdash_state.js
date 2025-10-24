@@ -74,9 +74,13 @@ export function comparePositions(oldPositions, newPositions) {
  * Check if position has significant changes
  */
 function hasPositionChanged(oldPos, newPos) {
-  // Check if szi or positionValue changed
-  if (oldPos.szi !== newPos.szi) return true;
-  if (Math.abs(oldPos.positionValue - newPos.positionValue) > 0.01) return true;
+  // Check if szi changed (even small changes matter for position tracking)
+  if (Math.abs(oldPos.szi - newPos.szi) > 0.0001) return true;
+  
+  // Check if positionValue changed significantly (>$1 or >0.01%)
+  const valueDiff = Math.abs(oldPos.positionValue - newPos.positionValue);
+  const valuePctChange = valueDiff / Math.abs(oldPos.positionValue);
+  if (valueDiff > 1 && valuePctChange > 0.0001) return true;
   
   // Check if entryPx changed significantly (>0.01%)
   if (Math.abs((oldPos.entryPx - newPos.entryPx) / oldPos.entryPx) > 0.0001) return true;
