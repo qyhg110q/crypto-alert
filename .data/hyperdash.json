@@ -3,40 +3,40 @@
     "0xc2a30212a8ddac9e123944d6e29faddce994e5f2": {
       "positions": {
         "BTC": {
-          "szi": 1582.86764,
-          "positionValue": 181952218.08564,
-          "entryPx": 110952.9,
-          "unrealizedPnl": 6328329.02531,
-          "liquidationPx": 80589.7425346758,
+          "szi": 1682.83417,
+          "positionValue": 193749746.49461,
+          "entryPx": 111187.4,
+          "unrealizedPnl": 6639703.13728,
+          "liquidationPx": 82800.887972947,
           "leverage": 13,
           "leverageType": "cross"
         },
         "ETH": {
-          "szi": 40043.8157,
-          "positionValue": 166714417.90381,
-          "entryPx": 3929.76,
-          "unrealizedPnl": 9351673.10919,
-          "liquidationPx": 2786.1003004089,
+          "szi": 40301.6268,
+          "positionValue": 167678948.46408,
+          "entryPx": 3931.22,
+          "unrealizedPnl": 9244161.7215,
+          "liquidationPx": 2795.4820601917,
           "leverage": 5,
           "leverageType": "cross"
         }
       },
       "lastNotifiedPositions": {
         "BTC": {
-          "szi": 1482.90111,
-          "positionValue": 169664647.59954,
-          "entryPx": 110680.1,
-          "unrealizedPnl": 5536909.48921,
-          "liquidationPx": 78813.5408427076,
-          "leverage": 9,
+          "szi": 1682.83417,
+          "positionValue": 193749746.49461,
+          "entryPx": 111187.4,
+          "unrealizedPnl": 6639703.13728,
+          "liquidationPx": 82800.887972947,
+          "leverage": 13,
           "leverageType": "cross"
         },
         "ETH": {
-          "szi": 40043.8157,
-          "positionValue": 165685291.84032,
-          "entryPx": 3929.76,
-          "unrealizedPnl": 8322547.0457,
-          "liquidationPx": 2797.1824350496,
+          "szi": 40301.6268,
+          "positionValue": 167678948.46408,
+          "entryPx": 3931.22,
+          "unrealizedPnl": 9244161.7215,
+          "liquidationPx": 2795.4820601917,
           "leverage": 5,
           "leverageType": "cross"
         }
