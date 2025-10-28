@@ -3,41 +3,59 @@
     "0xc2a30212a8ddac9e123944d6e29faddce994e5f2": {
       "positions": {
         "BTC": {
-          "szi": 2083.84048,
-          "positionValue": 238232979.03552,
-          "entryPx": 111897.3,
-          "unrealizedPnl": 5056719.60037,
-          "liquidationPx": 91152.9590944259,
+          "szi": 2186.34357,
+          "positionValue": 250227021.5865,
+          "entryPx": 112005.2,
+          "unrealizedPnl": 5345034.42785,
+          "liquidationPx": 92137.9183772354,
           "leverage": 13,
           "leverageType": "cross"
         },
         "ETH": {
           "szi": 47548.4198,
-          "positionValue": 195471553.7978,
+          "positionValue": 196018360.6255,
           "entryPx": 3965.94,
-          "unrealizedPnl": 6897360.20306,
-          "liquidationPx": 3086.7598448417,
+          "unrealizedPnl": 7444167.03076,
+          "liquidationPx": 3087.7146209773,
+          "leverage": 10,
+          "leverageType": "cross"
+        },
+        "SOL": {
+          "szi": 6552.77,
+          "positionValue": 1309898.723,
+          "entryPx": 198.987,
+          "unrealizedPnl": 5982.6176,
+          "liquidationPx": null,
           "leverage": 10,
           "leverageType": "cross"
         }
       },
       "lastNotifiedPositions": {
         "BTC": {
-          "szi": 1988.43582,
-          "positionValue": 228457356.66726,
-          "entryPx": 111770.7,
-          "unrealizedPnl": 6208434.80121,
-          "liquidationPx": 88830.5524585306,
+          "szi": 2186.34357,
+          "positionValue": 250227021.5865,
+          "entryPx": 112005.2,
+          "unrealizedPnl": 5345034.42785,
+          "liquidationPx": 92137.9183772354,
           "leverage": 13,
           "leverageType": "cross"
         },
         "ETH": {
           "szi": 47548.4198,
-          "positionValue": 197473342.27138,
+          "positionValue": 196018360.6255,
           "entryPx": 3965.94,
-          "unrealizedPnl": 8899148.67664,
-          "liquidationPx": 3053.7940963515,
-          "leverage": 5,
+          "unrealizedPnl": 7444167.03076,
+          "liquidationPx": 3087.7146209773,
+          "leverage": 10,
+          "leverageType": "cross"
+        },
+        "SOL": {
+          "szi": 6552.77,
+          "positionValue": 1309898.723,
+          "entryPx": 198.987,
+          "unrealizedPnl": 5982.6176,
+          "liquidationPx": null,
+          "leverage": 10,
           "leverageType": "cross"
         }
       }
