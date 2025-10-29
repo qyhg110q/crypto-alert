@@ -4,9 +4,9 @@
       "positions": {
         "SOL": {
           "szi": 560839.53,
-          "positionValue": 111063052.1259,
+          "positionValue": 110345177.5275,
           "entryPx": 198.4364,
-          "unrealizedPnl": -227955.5855,
+          "unrealizedPnl": -945830.1839,
           "liquidationPx": 117.1002445547,
           "leverage": 10,
           "leverageType": "cross"
