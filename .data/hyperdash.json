@@ -3,22 +3,22 @@
     "0xc2a30212a8ddac9e123944d6e29faddce994e5f2": {
       "positions": {
         "SOL": {
-          "szi": 425660.64,
-          "positionValue": 84480867.2208,
-          "entryPx": 198.1181,
-          "unrealizedPnl": 149781.2361,
-          "liquidationPx": 89.3103024898,
+          "szi": 437660.64,
+          "positionValue": 87033194.8704,
+          "entryPx": 198.1421,
+          "unrealizedPnl": 314176.1094,
+          "liquidationPx": 92.4590320032,
           "leverage": 10,
           "leverageType": "cross"
         }
       },
       "lastNotifiedPositions": {
         "SOL": {
-          "szi": 424112.72,
-          "positionValue": 83881013.7616,
-          "entryPx": 198.1183,
-          "unrealizedPnl": -143506.6671,
-          "liquidationPx": 88.8948990952,
+          "szi": 437660.64,
+          "positionValue": 87033194.8704,
+          "entryPx": 198.1421,
+          "unrealizedPnl": 314176.1094,
+          "liquidationPx": 92.4590320032,
           "leverage": 10,
           "leverageType": "cross"
         }
