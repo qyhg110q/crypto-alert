@@ -2,76 +2,58 @@
   "addresses": {
     "0xc2a30212a8ddac9e123944d6e29faddce994e5f2": {
       "positions": {
-        "BTC": {
-          "szi": 1210.02704,
-          "positionValue": 130369523.31664,
-          "entryPx": 110125.3,
-          "unrealizedPnl": -2885072.51334,
-          "liquidationPx": 94564.1115426757,
-          "leverage": 13,
-          "leverageType": "cross"
-        },
         "ETH": {
-          "szi": 39000,
-          "positionValue": 144807000,
+          "szi": 21500,
+          "positionValue": 77501050,
           "entryPx": 3845.33,
-          "unrealizedPnl": -5161000,
-          "liquidationPx": 3295.3584497421,
+          "unrealizedPnl": -5173616.666176,
+          "liquidationPx": 3219.0259928641,
           "leverage": 15,
           "leverageType": "cross"
         },
         "SOL": {
-          "szi": 600839.53,
-          "positionValue": 105369228.3761,
+          "szi": 522501.66,
+          "positionValue": 86834550.8754,
           "entryPx": 197.4753,
-          "unrealizedPnl": -13281779.3353,
-          "liquidationPx": 147.7856378243,
+          "unrealizedPnl": -16346657.075008,
+          "liquidationPx": 149.8190596557,
           "leverage": 10,
           "leverageType": "cross"
         },
         "HYPE": {
           "szi": 161961.04,
-          "positionValue": 6695631.35464,
+          "positionValue": 6312917.41712,
           "entryPx": 41.3333,
-          "unrealizedPnl": 1238.5256,
+          "unrealizedPnl": -381475.41192,
           "liquidationPx": null,
           "leverage": 5,
           "leverageType": "cross"
         }
       },
       "lastNotifiedPositions": {
-        "BTC": {
-          "szi": 1210.02704,
-          "positionValue": 133422421.53856,
-          "entryPx": 110125.3,
-          "unrealizedPnl": 167825.70858,
-          "liquidationPx": 85437.6408967229,
-          "leverage": 13,
-          "leverageType": "cross"
-        },
         "ETH": {
-          "szi": 39000,
-          "positionValue": 150649200,
+          "szi": 21500,
+          "positionValue": 77501050,
           "entryPx": 3845.33,
-          "unrealizedPnl": 681200,
-          "liquidationPx": 3075.9284151998,
+          "unrealizedPnl": -5173616.666176,
+          "liquidationPx": 3219.0259928641,
           "leverage": 15,
           "leverageType": "cross"
         },
         "SOL": {
-          "szi": 600839.53,
-          "positionValue": 110770775.7508,
+          "szi": 522501.66,
+          "positionValue": 86834550.8754,
           "entryPx": 197.4753,
-          "unrealizedPnl": -7880231.9606,
-          "liquidationPx": 132.3887563164,
+          "unrealizedPnl": -16346657.075008,
+          "liquidationPx": 149.8190596557,
           "leverage": 10,
           "leverageType": "cross"
         },
         "HYPE": {
-          "szi": 161666.7,
-          "positionValue": 6751686.3921,
-          "entryPx": 41.3338,
-          "unrealizedPnl": 69381.22384,
+          "szi": 161961.04,
+          "positionValue": 6312917.41712,
+          "entryPx": 41.3333,
+          "unrealizedPnl": -381475.41192,
           "liquidationPx": null,
           "leverage": 5,
           "leverageType": "cross"
