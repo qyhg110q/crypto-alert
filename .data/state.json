@@ -1,5 +1,5 @@
 {
-  "date": "2025-11-04",
+  "date": "2025-11-05",
   "tz": "Asia/Shanghai",
   "mode": "24h",
   "symbols": {
@@ -7,10 +7,10 @@
       "nextThresholdPct": 6
     },
     "ETHUSDT": {
-      "nextThresholdPct": 8
+      "nextThresholdPct": 6
     },
     "BNBUSDT": {
-      "nextThresholdPct": 10
+      "nextThresholdPct": 6
     }
   }
 }
