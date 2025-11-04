@@ -4,28 +4,28 @@
       "positions": {
         "ETH": {
           "szi": 24098.6529,
-          "positionValue": 84101888.75571,
+          "positionValue": 84099478.89042,
           "entryPx": 3807.72,
-          "unrealizedPnl": -7659044.026396,
-          "liquidationPx": 3336.9043458116,
+          "unrealizedPnl": -7661453.891686,
+          "liquidationPx": 3327.0569313843,
           "leverage": 25,
           "leverageType": "cross"
         },
         "SOL": {
           "szi": 437327.78,
-          "positionValue": 69906845.633,
+          "positionValue": 70125509.523,
           "entryPx": 190.6227,
-          "unrealizedPnl": -13457788.930377,
-          "liquidationPx": 151.3760430009,
+          "unrealizedPnl": -13239125.040377,
+          "liquidationPx": 151.3288050391,
           "leverage": 20,
           "leverageType": "cross"
         },
         "HYPE": {
           "szi": 161961.04,
-          "positionValue": 6067870.3636,
+          "positionValue": 6092812.36376,
           "entryPx": 41.3333,
-          "unrealizedPnl": -626522.46544,
-          "liquidationPx": 13.981448633,
+          "unrealizedPnl": -601580.46528,
+          "liquidationPx": 12.6393021665,
           "leverage": 10,
           "leverageType": "cross"
         }
@@ -64,18 +64,18 @@
       "positions": {
         "BTC": {
           "szi": 350,
-          "positionValue": 36337350,
+          "positionValue": 36274700,
           "entryPx": 106002.1,
-          "unrealizedPnl": -763390.14386,
-          "liquidationPx": 51783.4895118785,
+          "unrealizedPnl": -826040.14386,
+          "liquidationPx": 51785.9148309179,
           "leverage": 3,
           "leverageType": "cross"
         },
         "ETH": {
           "szi": 5000,
-          "positionValue": 17449500,
+          "positionValue": 17449000,
           "entryPx": 3575.23,
-          "unrealizedPnl": -426674.74608,
+          "unrealizedPnl": -427174.74608,
           "liquidationPx": null,
           "leverage": 3,
           "leverageType": "cross"
