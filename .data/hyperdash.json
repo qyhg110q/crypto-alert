@@ -4,28 +4,28 @@
       "positions": {
         "ETH": {
           "szi": 26991.5569,
-          "positionValue": 93987300.28149,
+          "positionValue": 93844245.02992,
           "entryPx": 3773.45,
-          "unrealizedPnl": -7864172.366966,
-          "liquidationPx": 3348.0071702297,
+          "unrealizedPnl": -8007227.618536,
+          "liquidationPx": 3354.2432437062,
           "leverage": 25,
           "leverageType": "cross"
         },
         "SOL": {
           "szi": 437327.78,
-          "positionValue": 70226094.9124,
+          "positionValue": 70033670.6892,
           "entryPx": 190.6227,
-          "unrealizedPnl": -13138539.650977,
-          "liquidationPx": 152.2481889185,
+          "unrealizedPnl": -13330963.874177,
+          "liquidationPx": 152.535120423,
           "leverage": 20,
           "leverageType": "cross"
         },
         "HYPE": {
           "szi": 161961.04,
-          "positionValue": 6104473.55864,
+          "positionValue": 6123261.03928,
           "entryPx": 41.3333,
-          "unrealizedPnl": -589919.2704,
-          "liquidationPx": 14.6381085552,
+          "unrealizedPnl": -571131.78976,
+          "liquidationPx": 16.7373603816,
           "leverage": 10,
           "leverageType": "cross"
         }
@@ -64,18 +64,18 @@
       "positions": {
         "BTC": {
           "szi": 350,
-          "positionValue": 36355200,
+          "positionValue": 36288350,
           "entryPx": 106002.1,
-          "unrealizedPnl": -745540.14386,
-          "liquidationPx": 51895.0793878799,
+          "unrealizedPnl": -812390.14386,
+          "liquidationPx": 51970.2186283863,
           "leverage": 3,
           "leverageType": "cross"
         },
         "ETH": {
           "szi": 5000,
-          "positionValue": 17410500,
+          "positionValue": 17384000,
           "entryPx": 3575.23,
-          "unrealizedPnl": -465674.74608,
+          "unrealizedPnl": -492174.74608,
           "liquidationPx": null,
           "leverage": 3,
           "leverageType": "cross"
