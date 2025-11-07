@@ -4,9 +4,9 @@
       "positions": {
         "ZEC": {
           "szi": -4400,
-          "positionValue": 2700984,
+          "positionValue": 2678148,
           "entryPx": 627.7359,
-          "unrealizedPnl": 61054.0282,
+          "unrealizedPnl": 83890.0282,
           "liquidationPx": 727.1055566788,
           "leverage": 10,
           "leverageType": "cross"
@@ -28,19 +28,19 @@
       "positions": {
         "BTC": {
           "szi": 700,
-          "positionValue": 70511000,
+          "positionValue": 69990200,
           "entryPx": 104520.3,
-          "unrealizedPnl": -2653212.04469,
-          "liquidationPx": 53118.3880606741,
+          "unrealizedPnl": -3174012.04469,
+          "liquidationPx": 54125.5374277627,
           "leverage": 5,
           "leverageType": "cross"
         },
         "ETH": {
           "szi": 16000,
-          "positionValue": 52452800,
+          "positionValue": 51742400,
           "entryPx": 3427.14,
-          "unrealizedPnl": -2381549.38847,
-          "liquidationPx": 1179.3505897284,
+          "unrealizedPnl": -3091949.38847,
+          "liquidationPx": 1212.1496968712,
           "leverage": 5,
           "leverageType": "cross"
         }
