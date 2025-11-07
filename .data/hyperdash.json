@@ -1,26 +1,46 @@
 {
   "addresses": {
     "0xc2a30212a8ddac9e123944d6e29faddce994e5f2": {
-      "positions": {},
-      "lastNotifiedPositions": {}
+      "positions": {
+        "BTC": {
+          "szi": -75.3364,
+          "positionValue": 7731172.0408,
+          "entryPx": 102131.8,
+          "unrealizedPnl": -36927.78226,
+          "liquidationPx": 103454.4623141464,
+          "leverage": 40,
+          "leverageType": "cross"
+        }
+      },
+      "lastNotifiedPositions": {
+        "BTC": {
+          "szi": -75.3364,
+          "positionValue": 7731172.0408,
+          "entryPx": 102131.8,
+          "unrealizedPnl": -36927.78226,
+          "liquidationPx": 103454.4623141464,
+          "leverage": 40,
+          "leverageType": "cross"
+        }
+      }
     },
     "0xb317d2bc2d3d2df5fa441b5bae0ab9d8b07283ae": {
       "positions": {
         "BTC": {
           "szi": 700,
-          "positionValue": 71095500,
+          "positionValue": 71835400,
           "entryPx": 104520.3,
-          "unrealizedPnl": -2068712.04469,
-          "liquidationPx": 51919.3271173946,
+          "unrealizedPnl": -1328812.04469,
+          "liquidationPx": 50628.6334465085,
           "leverage": 5,
           "leverageType": "cross"
         },
         "ETH": {
           "szi": 16000,
-          "positionValue": 53302400,
+          "positionValue": 54212800,
           "entryPx": 3427.14,
-          "unrealizedPnl": -1531949.38847,
-          "liquidationPx": 1142.7793762691,
+          "unrealizedPnl": -621549.38847,
+          "liquidationPx": 1096.1817200191,
           "leverage": 5,
           "leverageType": "cross"
         }
