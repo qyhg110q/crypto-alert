@@ -1,28 +1,8 @@
 {
   "addresses": {
     "0xc2a30212a8ddac9e123944d6e29faddce994e5f2": {
-      "positions": {
-        "ZEC": {
-          "szi": -1517.95,
-          "positionValue": 741518.575,
-          "entryPx": 500.8589,
-          "unrealizedPnl": 18760.3117,
-          "liquidationPx": 525.6475551162,
-          "leverage": 10,
-          "leverageType": "cross"
-        }
-      },
-      "lastNotifiedPositions": {
-        "ZEC": {
-          "szi": -1517.95,
-          "positionValue": 741518.575,
-          "entryPx": 500.8589,
-          "unrealizedPnl": 18760.3117,
-          "liquidationPx": 525.6475551162,
-          "leverage": 10,
-          "leverageType": "cross"
-        }
-      }
+      "positions": {},
+      "lastNotifiedPositions": {}
     },
     "0xb317d2bc2d3d2df5fa441b5bae0ab9d8b07283ae": {
       "positions": {},
