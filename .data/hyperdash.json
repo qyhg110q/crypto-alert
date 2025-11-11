@@ -8,9 +8,9 @@
       "positions": {
         "ETH": {
           "szi": 55132.869,
-          "positionValue": 196631377.2885,
+          "positionValue": 197375671.02,
           "entryPx": 3467.64,
-          "unrealizedPnl": 5450360.10308,
+          "unrealizedPnl": 6194653.83458,
           "liquidationPx": 2841.7189554538,
           "leverage": 5,
           "leverageType": "cross"
