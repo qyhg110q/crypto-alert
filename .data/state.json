@@ -1,16 +1,16 @@
 {
-  "date": "2025-11-14",
+  "date": "2025-11-15",
   "tz": "Asia/Shanghai",
   "mode": "24h",
   "symbols": {
     "BTCUSDT": {
-      "nextThresholdPct": 8
+      "nextThresholdPct": 6
     },
     "ETHUSDT": {
-      "nextThresholdPct": 12
+      "nextThresholdPct": 6
     },
     "BNBUSDT": {
-      "nextThresholdPct": 8
+      "nextThresholdPct": 6
     }
   }
 }
