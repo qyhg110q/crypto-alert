@@ -4,13 +4,13 @@
   "mode": "24h",
   "symbols": {
     "BTCUSDT": {
-      "nextThresholdPct": 6
+      "nextThresholdPct": 8
     },
     "ETHUSDT": {
       "nextThresholdPct": 12
     },
     "BNBUSDT": {
-      "nextThresholdPct": 6
+      "nextThresholdPct": 8
     }
   }
 }
