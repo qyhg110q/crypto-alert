@@ -7,11 +7,11 @@
     "0xb317d2bc2d3d2df5fa441b5bae0ab9d8b07283ae": {
       "positions": {
         "ETH": {
-          "szi": 54277.3393,
-          "positionValue": 169193322.06596,
-          "entryPx": 3048.31,
-          "unrealizedPnl": 3738797.52111,
-          "liquidationPx": 1795.4178691558,
+          "szi": 54514.7351,
+          "positionValue": 169737079.20736,
+          "entryPx": 3048.56,
+          "unrealizedPnl": 3545440.70351,
+          "liquidationPx": 1801.4368974729,
           "leverage": 5,
           "leverageType": "cross"
         }
