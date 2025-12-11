@@ -8,40 +8,58 @@
       "positions": {
         "BTC": {
           "szi": 958.91061,
-          "positionValue": 87915801.45663,
+          "positionValue": 89571840.0801,
           "entryPx": 91502.7,
-          "unrealizedPnl": 172822.28751,
+          "unrealizedPnl": 1828860.91098,
           "liquidationPx": null,
           "leverage": 5,
           "leverageType": "cross"
         },
         "ETH": {
           "szi": 140094.5238,
-          "positionValue": 451160404.44552,
+          "positionValue": 457758856.5165,
           "entryPx": 3179.54,
-          "unrealizedPnl": 5723241.40167,
-          "liquidationPx": 2025.2660193141,
+          "unrealizedPnl": 12321693.47265,
+          "liquidationPx": 1571.5118561657,
           "leverage": 5,
+          "leverageType": "cross"
+        },
+        "SOL": {
+          "szi": 100000,
+          "positionValue": 13733000,
+          "entryPx": 135.6724,
+          "unrealizedPnl": 165751.5336,
+          "liquidationPx": null,
+          "leverage": 20,
           "leverageType": "cross"
         }
       },
       "lastNotifiedPositions": {
         "BTC": {
           "szi": 958.91061,
-          "positionValue": 87915801.45663,
+          "positionValue": 89571840.0801,
           "entryPx": 91502.7,
-          "unrealizedPnl": 172822.28751,
+          "unrealizedPnl": 1828860.91098,
           "liquidationPx": null,
           "leverage": 5,
           "leverageType": "cross"
         },
         "ETH": {
           "szi": 140094.5238,
-          "positionValue": 451160404.44552,
+          "positionValue": 457758856.5165,
           "entryPx": 3179.54,
-          "unrealizedPnl": 5723241.40167,
-          "liquidationPx": 2025.2660193141,
+          "unrealizedPnl": 12321693.47265,
+          "liquidationPx": 1571.5118561657,
           "leverage": 5,
+          "leverageType": "cross"
+        },
+        "SOL": {
+          "szi": 100000,
+          "positionValue": 13733000,
+          "entryPx": 135.6724,
+          "unrealizedPnl": 165751.5336,
+          "liquidationPx": null,
+          "leverage": 20,
           "leverageType": "cross"
         }
       }
