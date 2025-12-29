@@ -8,27 +8,27 @@
       "positions": {
         "BTC": {
           "szi": 1000,
-          "positionValue": 87219000,
+          "positionValue": 87206000,
           "entryPx": 91506.7,
-          "unrealizedPnl": -4287767.29312,
+          "unrealizedPnl": -4300767.29312,
           "liquidationPx": null,
           "leverage": 5,
           "leverageType": "cross"
         },
         "ETH": {
           "szi": 203340.6489,
-          "positionValue": 596581129.80771,
+          "positionValue": 596784470.45661,
           "entryPx": 3147.39,
-          "unrealizedPnl": -43411834.41217,
-          "liquidationPx": 2144.153349731,
+          "unrealizedPnl": -43208493.76327,
+          "liquidationPx": 2144.2694142692,
           "leverage": 5,
           "leverageType": "cross"
         },
         "SOL": {
           "szi": 511612.85,
-          "positionValue": 63071632.148,
+          "positionValue": 63061399.891,
           "entryPx": 130.1911,
-          "unrealizedPnl": -3535824.6519,
+          "unrealizedPnl": -3546056.9089,
           "liquidationPx": null,
           "leverage": 10,
           "leverageType": "cross"
