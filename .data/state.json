@@ -7,10 +7,10 @@
       "nextThresholdPct": 10
     },
     "ETHUSDT": {
-      "nextThresholdPct": 10
+      "nextThresholdPct": 12
     },
     "BNBUSDT": {
-      "nextThresholdPct": 10
+      "nextThresholdPct": 12
     }
   }
 }
