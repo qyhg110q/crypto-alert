@@ -4,7 +4,7 @@
   "mode": "24h",
   "symbols": {
     "BTCUSDT": {
-      "nextThresholdPct": 14
+      "nextThresholdPct": 16
     },
     "ETHUSDT": {
       "nextThresholdPct": 16
