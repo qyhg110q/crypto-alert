@@ -1,5 +1,5 @@
 {
-  "date": "2026-06-15",
+  "date": "2026-06-16",
   "tz": "Asia/Shanghai",
   "mode": "24h",
   "symbols": {
@@ -7,7 +7,7 @@
       "nextThresholdPct": 6
     },
     "ETHUSDT": {
-      "nextThresholdPct": 6
+      "nextThresholdPct": 12
     },
     "BNBUSDT": {
       "nextThresholdPct": 6
