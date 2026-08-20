@@ -1,10 +1,10 @@
 {
-  "date": "2026-08-20",
+  "date": "2026-08-21",
   "tz": "Asia/Shanghai",
   "mode": "24h",
   "symbols": {
     "BTCUSDT": {
-      "nextThresholdPct": 12
+      "nextThresholdPct": 10
     },
     "ETHUSDT": {
       "nextThresholdPct": 20
